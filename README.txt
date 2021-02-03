@@ -1,4 +1,4 @@
-# ascii_imager
+# termograph
 A simple terminal-based image to ascii converter
 
 This python script uses the PIL package which usually comes with any default python install.
