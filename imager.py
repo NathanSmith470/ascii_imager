@@ -3,7 +3,7 @@ import sys
 
 # COMMAND-LINE FORMAT
 # python3 imager.py {image_file(required)} {format:ascii(default),color} {width:40(default)}
-# EX: python3 imager.py Dont.png ascii 50
+# EX: python3 imager.py smile.png ascii 50
 
 
 
@@ -28,7 +28,9 @@ def ascii_show():
     newsize = res_fac, int(size[1]/(size[0]/res_fac))
     im = im.resize(newsize)
     size = im.size
-
+    
+    stupid_jpegs = False
+    
     # convert image to greyscale
     for y in range(size[1]):
         #print(round(y/size[1]*100,2), "%")
@@ -36,26 +38,43 @@ def ascii_show():
             pixel = x, y
             data = im.getpixel(pixel)
             # convert RBG values into single BW value
-            avg = int(( data[0] + data[1] + data[2] )/3)
-            data = (avg,avg,avg)
+            try:
+                avg = int(( data[0] + data[1] + data[2] )/3)
+                data = (avg,avg,avg)
+            except TypeError:
+                data = (data,data,data)
+                stupid_jpegs = True
             im.putpixel(pixel, data)
 
     # display pixels based on light-level as symbols
+    # ASCII liminance: .-~*:!=#$@
     for y in range(size[1]):
         line = ""
         for x in range(size[0]):
             pixel = x, y
             data = im.getpixel(pixel)
-            if data[0] < 35:
+            if stupid_jpegs:
+                data = (data,data,data)
+            if data[0] < 25:
                 line += "  "
-            elif data[0] < 75:
+            elif data[0] < 50:
                 line += ". "
-            elif data[0] < 100:
+            elif data[0] < 75:
                 line += "- "
-            elif data[0] < 150:
-                line += "= "
+            elif data[0] < 100:
+                line += "~ "
+            elif data[0] <= 125:
+                line += "* "
+            elif data[0] <= 150:
+                line += ": "
+            elif data[0] <= 175:
+                line += "! "
             elif data[0] <= 200:
+                line += "= "
+            elif data[0] <= 225:
                 line += "# "
+            elif data[0] <= 250:
+                line += "$ "
             elif data[0] <= 255:
                 line += "@ "
         print(line)
@@ -84,8 +103,8 @@ def color_show():
 
             # determine color
             color = WHITE
-            u_thresh = 55
-            l_thresh = 35
+            u_thresh = 100
+            l_thresh = 35   
             c_r = False
             c_g = False
             c_b = False
@@ -113,22 +132,9 @@ def color_show():
                 color = CYAN
             else:
                 color = BLACK
-
-            # Determine symbol
-            avg = int((data[0] + data[1] + data[2]) / 3)
-            symbol = " "
-            if avg < 35:
-                symbol = "  "
-            elif avg < 75:
-                symbol = ". "
-            elif avg < 100:
-                symbol = "- "
-            elif avg < 150:
-                symbol = "= "
-            elif avg <= 200:
-                symbol = "# "
-            elif avg <= 255:
-                symbol = "@ "
+                
+            symbol = "  "
+            
 
             line += color + symbol
 
@@ -161,6 +167,3 @@ if __name__ == "__main__":
             color_show()
     except IndexError:
         print("Unrecognised parameter!\nUse format: python3 imager.py {image_file(required)} {format:ascii(default),color} {width:40(default)}")
-    
-
-    
